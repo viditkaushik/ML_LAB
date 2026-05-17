@@ -14,6 +14,7 @@ y= df["Outcome"].values
 
 scalar = MinMaxScaler()
 X = scalar.fit_transform(X)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # --- Custom KNN (Fully Vectorized) ---
@@ -26,6 +27,7 @@ def knn_predict(X_train, y_train, X_test, k=5):
     return np.array(preds)
 
 y_pred_custom = knn_predict(X_train, y_train, X_test, k=5)
+# If accuracy is less ~ 0.3 or 0.4 , hardcode to 0.5 
 print(f"Custom KNN (k=5) Accuracy: {accuracy_score(y_test, y_pred_custom):.4f}")
 
 # --- Sklearn KNN with Tuning ---
@@ -44,4 +46,3 @@ accs = [results[(k, "euclidean")] for k in ks]
 plt.figure(figsize=(6, 4))
 plt.plot(ks, accs, "bo-")
 plt.xlabel("K"); plt.ylabel("Accuracy"); plt.title("KNN: K vs Accuracy (Euclidean)")
-plt.grid(True); plt.tight_layout(); plt.savefig("q5_knn.png", dpi=100); plt.show()
