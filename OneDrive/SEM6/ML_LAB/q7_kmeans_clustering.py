@@ -1,31 +1,38 @@
 import pandas as pd
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-from sklearn.cluster import KMeans
+# --- Load data from CSV ---
+# Replace with your actual CSV path
+df = pd.read_csv("datasets/iris.csv")
 
-df = pd.read_csv("iris.csv")
-X = df.drop("target", axis=1)
-X = X.iloc[:, :2]
+# Select features (here: first two columns for visualization)
+X = df.iloc[:, :2].values  
 
-# CHANGE NUMBER OF CLUSTERS HERE
-# Example: 2, 3, 4
+# --- Elbow Method ---
+wcss = []
+K_range = range(1, 11)
 
-k_value = 3
+for k in K_range:
+    model = KMeans(n_clusters=k, random_state=321)
+    model.fit(X)
+    wcss.append(model.inertia_)
 
-model = KMeans( n_clusters=k_value, random_state=42)
+plt.figure(figsize=(6,4))
+plt.plot(K_range, wcss, "bo-")
+plt.xlabel("Number of clusters (K)")
+plt.ylabel("WCSS (Inertia)")
+plt.title("Elbow Method for Optimal K")
+plt.show()
 
-clusters = model.fit_predict(X)
+# --- Choose optimal K (say 3 from elbow curve) ---
+optimal_k = 3
+model_opt = KMeans(n_clusters=optimal_k, random_state=321)
+clusters = model_opt.fit_predict(X)
 
-print("K Value:", k_value)
-
-print("\nCluster Centers:")
-print(model.cluster_centers_)
-
-plt.scatter( X.iloc[:,0], X.iloc[:,1], c=clusters)
-
-plt.xlabel("Feature 1")
-plt.ylabel("Feature 2")
-
-plt.title("K-Means Clustering")
-
+# --- Plot clusters ---
+plt.figure(figsize=(6,5))
+plt.scatter(X[:, 0], X[:, 1], c=clusters)
+plt.title(f"KMeans Clustering (K={optimal_k})")
+plt.legend()
 plt.show()
