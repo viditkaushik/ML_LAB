@@ -1,34 +1,46 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-df = pd.read_csv("datasets/diabetes1.csv").dropna()
-X= df.drop("Outcome", axis=1) 
-y=df["Outcome"].astype(int)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Load dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
 
-n_trees_list = [1, 5, 10, 20, 50, 100, 150, 200]
-results = []
-for n in n_trees_list:
-    clf = RandomForestClassifier(n_estimators=n, random_state=42)
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    results.append({
-        "n_trees": n,
-        "accuracy":  accuracy_score(y_test, y_pred),
-        "precision": precision_score(y_test, y_pred),
-        "recall":    recall_score(y_test, y_pred),
-        "f1":        f1_score(y_test, y_pred),
-    })
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
 
-res_df = pd.DataFrame(results)
-print(res_df.to_string(index=False))
+# Different numbers of trees
+tree_counts = [10, 50, 100, 200]
 
-for metric in ["accuracy","precision","recall","f1"]:
-    plt.plot(res_df["n_trees"], res_df[metric], marker="o", label=metric.capitalize())
-plt.xlabel("Number of Trees"); plt.ylabel("Score")
-plt.title("Random Forest: Effect of Number of Trees")
-plt.show()
+print("Trees\tAccuracy\tPrecision\tRecall\t\tF1-Score")
+
+for n in tree_counts:
+    # Create Random Forest model
+    rf = RandomForestClassifier(
+        n_estimators=n,
+        random_state=42
+    )
+
+    # Train model
+    rf.fit(X_train, y_train)
+
+    # Predict
+    y_pred = rf.predict(X_test)
+
+    # Evaluation metrics
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(
+        y_test, y_pred, average='weighted'
+    )
+    recall = recall_score(
+        y_test, y_pred, average='weighted'
+    )
+    f1 = f1_score(
+        y_test, y_pred, average='weighted'
+    )
+
+    print(f"{n}\t{accuracy:.4f}\t\t{precision:.4f}\t\t{recall:.4f}\t\t{f1:.4f}")
